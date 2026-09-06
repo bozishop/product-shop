@@ -292,7 +292,12 @@
 
   // 一键发布：把完整数据写入仓库 products.json
   async function publishJSON(cfg, data) {
-    var content = exportJSON(data);
+    // 发布时注入 raw 直链基址：绑定自定义域名后，前台仍可在 Pages 部署窗口内秒开新上传的图片
+    var payload = Object.assign({}, data);
+    payload.site = Object.assign({}, data && data.site, {
+      rawBase: 'https://raw.githubusercontent.com/' + cfg.owner + '/' + cfg.repo + '/' + (cfg.branch || 'main')
+    });
+    var content = exportJSON(payload);
     var base64 = btoa(unescape(encodeURIComponent(content)));
     var body = {
       message: 'chore: publish products.json (from admin)',
@@ -320,12 +325,24 @@
   }
 
   /* ---------- Raw 直链解析 ---------- */
+  // raw 直链基址：绑定自定义域名时 hostname 不再是 *.github.io，无法自动推导，
+  // 由后台「一键发布」时把基址写入 site.rawBase，前台加载后通过 setRawBase 提供。
+  var RAW_BASE = '';
+  function setRawBase(url) {
+    RAW_BASE = String(url || '').replace(/\/+$/, '');
+  }
+
   // 把相对路径（如 images/xxx.jpg）转换为 GitHub raw 直链，用于 Pages 部署延迟窗口内秒开图片。
-  // 支持三种部署形态：bozishop.github.io/product-shop（项目站）/ bozishop.github.io（用户名站）/ localhost（本地预览 原样返回）
+  // 解析顺序：显式 rawBase（自定义域名）→ *.github.io 自动推导 → 其他环境（localhost 等）原样返回
   function toRawGitUrl(path) {
     if (!path) return '';
     if (/^(https?:)?\/\//i.test(path) || /^data:/i.test(path)) return path; // 已有协议/外链/base64 不动
+    var clean = String(path).replace(/^\/+/, '');
     try {
+      // 1) 显式基址优先（适配自定义域名）
+      if (RAW_BASE) return RAW_BASE + '/' + clean;
+
+      // 2) github.io 域名自动推导（bozishop.github.io/product-shop 或 bozishop.github.io）
       var host = window.location.hostname || '';
       var hostLow = host.toLowerCase();
       if (hostLow.indexOf('github.io') === -1) return path; // 非 github.io（如 localhost）原样返回
@@ -336,7 +353,6 @@
       if (!owner || !repo) return path;
 
       var branch = 'main';
-      var clean = String(path).replace(/^\/+/, '');
       return 'https://raw.githubusercontent.com/' + encodeURIComponent(owner) +
         '/' + encodeURIComponent(repo) + '/' + encodeURIComponent(branch) + '/' + clean;
     } catch (e) {
@@ -402,6 +418,7 @@
     clearGitConfig: clearGitConfig,
     getFileSha: getFileSha,
     toRawGitUrl: toRawGitUrl,
+    setRawBase: setRawBase,
     uploadImage: uploadImage,
     publishJSON: publishJSON,
     testConnection: testConnection,

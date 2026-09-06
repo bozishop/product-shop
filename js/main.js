@@ -61,17 +61,16 @@
     var local = S.getLocal();
     if (local) {
       state.data = local;
-      return;
+    } else {
+      var loaded = null;
+      try {
+        var res = await fetch('products.json' + '?v=' + Date.now());
+        if (res.ok) loaded = S.normalizeData(await res.json());
+      } catch (e) { /* 离线或不存在时使用默认数据 */ }
+      if (loaded) state.data = loaded;
     }
-    try {
-      var res = await fetch('products.json' + '?v=' + Date.now());
-      if (res.ok) {
-        var json = await res.json();
-        state.data = S.normalizeData(json);
-        return;
-      }
-    } catch (e) { /* 离线或不存在时使用默认数据 */ }
-    state.data = S.defaultData();
+    // raw 直链基址：后台发布时写入 site.rawBase，绑定自定义域名后也能秒开新上传的图片
+    S.setRawBase(state.data.site && state.data.site.rawBase);
   }
 
   /* ---------- 渲染：站点头部 ---------- */

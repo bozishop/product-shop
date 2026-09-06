@@ -88,6 +88,16 @@
     return false;
   }
 
+  // raw 直链基址（适配自定义域名）：后台优先按本机 GitHub 配置推导，否则用发布时写入的 site.rawBase
+  function ensureRawBase() {
+    var c = S.getGitConfig();
+    if (c && c.owner && c.repo) {
+      S.setRawBase('https://raw.githubusercontent.com/' + c.owner + '/' + c.repo + '/' + (c.branch || 'main'));
+      return;
+    }
+    S.setRawBase(state.data.site && state.data.site.rawBase);
+  }
+
   function saveGitState() {
     try { localStorage.setItem('ps_git_sync_v1', JSON.stringify(state.gitSync || null)); } catch (e) {}
   }
@@ -1065,6 +1075,7 @@
 
   function init() {
     loadGitState();
+    ensureRawBase();
     document.documentElement.setAttribute('data-theme', S.getTheme());
     document.body.setAttribute('data-theme', S.getTheme());
 
