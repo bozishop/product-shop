@@ -16,11 +16,23 @@
     "paymentTip": "请使用微信或支付宝扫码支付，付款后截图联系客服确认订单哦～",
     "paymentNote": "以上二维码为示例，请在后台配置页替换为您的真实收款码"
   },
-  "categories": ["新品", "热卖", "清仓"],
+  "categories": [
+    {
+      "id": "c_0",
+      "name": "新品"
+    },
+    {
+      "id": "c_1",
+      "name": "热卖"
+    },
+    {
+      "id": "c_2",
+      "name": "清仓"
+    }
+  ],
   "products": [
     {
       "id": "p_1001",
-      "active": true,
       "name": "极简陶瓷马克杯",
       "category": "新品",
       "price": 39,
@@ -28,15 +40,19 @@
       "stock": 120,
       "sales": 86,
       "rating": 4.9,
-      "tags": ["新品", "简约"],
-      "image": "images/product-1.svg",
-      "link": "",
+      "tags": [
+        "新品",
+        "简约"
+      ],
+      "image": "images/img_mtps140s.jpg",
       "createdAt": "2026-01-10T10:00:00.000Z",
-      "description": "<p>一杯温柔的日常，从一只好杯子开始。</p><ul><li>材质：高温白瓷，釉面温润易清洗</li><li>容量：350ml，适合咖啡/茶饮</li><li>颜色：米白 / 雾灰 两款可选</li></ul><blockquote>设计师手作款，每一只的釉色都略有不同，独一无二。</blockquote>"
+      "description": "<p>一杯温柔的日常，从一只好杯子开始。</p><ul><li>材质：高温白瓷</li><li>容量：350ml</li></ul><blockquote>设计师手作款。</blockquote>",
+      "active": true,
+      "link": "",
+      "updatedAt": "2026-09-06T12:20:44.259Z"
     },
     {
       "id": "p_1002",
-      "active": true,
       "name": "北欧实木香薰摆件",
       "category": "新品",
       "price": 89,
@@ -44,15 +60,19 @@
       "stock": 60,
       "sales": 42,
       "rating": 4.8,
-      "tags": ["新品", "家居"],
+      "tags": [
+        "新品",
+        "家居"
+      ],
       "image": "images/product-2.svg",
-      "link": "",
       "createdAt": "2026-01-08T09:30:00.000Z",
-      "description": "<p>天然黑胡桃木，纹理清晰，搭配榉木底座，为桌面增添一抹自然气息。</p><ul><li>尺寸：约 12 × 10 cm</li><li>适用：桌面摆件 / 香薰座</li></ul><p>随赠 <strong>雪松精油 5ml</strong> 一支。</p>"
+      "description": "<p>天然黑胡桃木，纹理清晰。</p><p>随赠 <strong>雪松精油 5ml</strong>。</p>",
+      "active": true,
+      "link": "",
+      "updatedAt": ""
     },
     {
       "id": "p_1003",
-      "active": true,
       "name": "便携蓝牙音箱",
       "category": "热卖",
       "price": 199,
@@ -60,15 +80,19 @@
       "stock": 80,
       "sales": 342,
       "rating": 4.7,
-      "tags": ["热卖", "数码"],
+      "tags": [
+        "热卖",
+        "数码"
+      ],
       "image": "images/product-3.svg",
-      "link": "",
       "createdAt": "2026-01-05T14:00:00.000Z",
-      "description": "<p>小巧机身，澎湃音效，陪你度过每一个通勤与露营时刻。</p><ul><li>蓝牙 5.3，传输稳定</li><li>续航约 12 小时</li><li>IPX5 防水，户外无忧</li></ul><p><em>开箱即用，附赠挂绳与收纳袋。</em></p>"
+      "description": "<p>小巧机身，澎湃音效。</p><ul><li>蓝牙 5.3</li><li>续航约 12 小时</li><li>IPX5 防水</li></ul>",
+      "active": true,
+      "link": "",
+      "updatedAt": ""
     },
     {
       "id": "p_1004",
-      "active": true,
       "name": "纯棉宽松卫衣",
       "category": "热卖",
       "price": 129,
@@ -76,15 +100,19 @@
       "stock": 200,
       "sales": 518,
       "rating": 4.8,
-      "tags": ["热卖", "服饰"],
+      "tags": [
+        "热卖",
+        "服饰"
+      ],
       "image": "images/product-4.svg",
-      "link": "",
       "createdAt": "2026-01-03T11:20:00.000Z",
-      "description": "<p>320g 精梳棉，厚实不透，宽松版型遮肉显瘦。</p><ul><li>成分：95% 棉 + 5% 氨纶</li><li>尺码：S / M / L / XL</li></ul><blockquote>落肩设计，慵懒街头感，男女同款。</blockquote>"
+      "description": "<p>320g 精梳棉，宽松版型。</p><ul><li>成分：95% 棉</li><li>尺码：S/M/L/XL</li></ul>",
+      "active": true,
+      "link": "",
+      "updatedAt": ""
     },
     {
       "id": "p_1005",
-      "active": true,
       "name": "复古帆布托特包",
       "category": "清仓",
       "price": 49,
@@ -92,15 +120,18 @@
       "stock": 30,
       "sales": 264,
       "rating": 4.5,
-      "tags": ["清仓"],
+      "tags": [
+        "清仓"
+      ],
       "image": "images/product-5.svg",
-      "link": "",
       "createdAt": "2025-12-28T16:40:00.000Z",
-      "description": "<p>加厚帆布，大容量，通勤上学两相宜。</p><ul><li>尺寸：34 × 38 cm，可放 14 寸笔记本</li><li>内袋 + 磁扣，安全方便</li></ul><p><strong>清仓特惠，售完即止。</strong></p>"
+      "description": "<p>加厚帆布，大容量。</p><p><strong>清仓特惠，售完即止。</strong></p>",
+      "active": true,
+      "link": "",
+      "updatedAt": ""
     },
     {
       "id": "p_1006",
-      "active": true,
       "name": "迷你香薰加湿器",
       "category": "清仓",
       "price": 69,
@@ -108,11 +139,16 @@
       "stock": 45,
       "sales": 178,
       "rating": 4.6,
-      "tags": ["清仓", "数码"],
+      "tags": [
+        "清仓",
+        "数码"
+      ],
       "image": "images/product-6.svg",
-      "link": "",
       "createdAt": "2025-12-20T09:00:00.000Z",
-      "description": "<p>超声波细雾加湿，静音运行，内置七彩小夜灯。</p><ul><li>容量：300ml，可持续 8 小时</li><li>缺水自动断电，安全放心</li></ul>"
+      "description": "<p>超声波细雾加湿，静音运行。</p><ul><li>容量：300ml</li><li>缺水自动断电</li></ul>",
+      "active": true,
+      "link": "",
+      "updatedAt": ""
     }
   ]
 }
