@@ -12,7 +12,8 @@
     editingId: null,
     selectedIds: [],
     search: '',
-    catFilter: ''
+    catFilter: '',
+    gitSync: null   // 已验证可用的 GitHub 同步快照 {ok,owner,repo,token,branch}
   };
 
   /* ---------- 工具 ---------- */
@@ -63,8 +64,56 @@
   }
 
   function githubConfigured() {
+    return gitSyncState() === 'ok';
+  }
+
+  /* ---------- 只读锁：GitHub 同步验证可用之前，全部内容编辑锁定 ---------- */
+  // 返回 'ok'（已验证可用）| 'unverified'（已填写但与验证快照不一致）| ''（未配置/未验证）
+  function gitSyncState() {
+    var st = state.gitSync;
+    if (!st || !st.ok) return '';
     var c = S.getGitConfig();
-    return !!(c && c.owner && c.repo && c.token);
+    if (!c || !c.owner || !c.repo || !c.token) return '';
+    // 当前配置与验证通过时的快照不一致（改过任何一项）则需重新验证
+    if (st.owner !== c.owner || st.repo !== c.repo || st.token !== c.token ||
+        (st.branch || 'main') !== (c.branch || 'main')) return 'unverified';
+    return 'ok';
+  }
+
+  // 写操作统一闸门：只读时拦截并跳转到 GitHub 同步页
+  function requireWritable() {
+    if (githubConfigured()) return true;
+    toast('后台处于只读模式：请先到「GitHub 同步」完成配置并通过「测试连接」', 'error');
+    switchPage('github');
+    return false;
+  }
+
+  function saveGitState() {
+    try { localStorage.setItem('ps_git_sync_v1', JSON.stringify(state.gitSync || null)); } catch (e) {}
+  }
+
+  function loadGitState() {
+    try { state.gitSync = JSON.parse(localStorage.getItem('ps_git_sync_v1') || 'null'); }
+    catch (e) { state.gitSync = null; }
+  }
+
+  function renderReadonlyBanner() {
+    var bar = $('#roLockBar');
+    if (!bar) return;
+    var st = gitSyncState();
+    if (st === 'ok') {
+      bar.classList.add('hidden');
+      document.body.classList.remove('readonly-mode');
+      return;
+    }
+    bar.innerHTML = (st === 'unverified'
+      ? '🔒 <b>只读模式</b>：GitHub 配置已修改但尚未重新验证，编辑已锁定。请在「GitHub 同步」点击「测试连接」，通过后自动解锁。'
+      : '🔒 <b>只读模式</b>：尚未配置可用的 GitHub 同步，所有编辑/删除操作已锁定。请在「GitHub 同步」填写 owner / repo / Token 并通过「测试连接」解锁。')
+      + ' <button type="button" class="btn btn-sm btn-primary" id="roGoGit">前往配置 →</button>';
+    bar.classList.remove('hidden');
+    document.body.classList.add('readonly-mode');
+    var go = $('#roGoGit');
+    if (go) go.addEventListener('click', function () { switchPage('github'); });
   }
 
   function toggleBtnLoading(btn, loading, text) {
@@ -284,6 +333,7 @@
   }
 
   function saveProductFromForm() {
+    if (!requireWritable()) return;
     var name = $('#p_name').value.trim();
     var price = Number($('#p_price').value);
     if (!name || isNaN(price)) {
@@ -327,6 +377,7 @@
   }
 
   function deleteProducts(ids) {
+    if (!requireWritable()) return;
     var names = state.data.products.filter(function (p) { return ids.indexOf(p.id) > -1; }).map(function (p) { return p.name; });
     if (!confirm('确定删除以下 ' + ids.length + ' 个商品？\n—— ' + names.join('、'))) return;
     state.data.products = state.data.products.filter(function (p) { return ids.indexOf(p.id) === -1; });
@@ -722,6 +773,7 @@
   }
 
   function renameCategory(id, newName) {
+    if (!requireWritable()) return;
     var cat = state.data.categories.filter(function (c) { return c.id === id; })[0];
     if (!cat) return;
     if (state.data.categories.some(function (c) { return c.id !== id && c.name === newName; })) {
@@ -871,10 +923,18 @@
     toggleBtnLoading(btn, true);
     S.testConnection(cfg)
       .then(function () {
-        setGitStatus('✅ 连接成功！仓库 <b>' + cfg.owner + '/' + cfg.repo + '</b>（分支 ' + cfg.branch + '）可正常写入。', 'success');
-        toast('连接成功', 'success');
+        // 验证通过：记录快照并解锁后台编辑
+        state.gitSync = { ok: true, owner: cfg.owner, repo: cfg.repo, token: cfg.token, branch: cfg.branch || 'main' };
+        saveGitState();
+        renderReadonlyBanner();
+        setGitStatus('✅ 连接成功！仓库 <b>' + cfg.owner + '/' + cfg.repo + '</b>（分支 ' + cfg.branch + '）可正常写入，<b>后台编辑已解锁</b>。', 'success');
+        toast('连接成功，后台编辑已解锁', 'success');
       })
       .catch(function (e) {
+        // 验证失败：保持/进入只读
+        state.gitSync = null;
+        saveGitState();
+        renderReadonlyBanner();
         setGitStatus('❌ ' + e.message, 'danger');
         toast(e.message, 'error');
       })
@@ -925,6 +985,7 @@
   }
 
   function doImport(text) {
+    if (!requireWritable()) return;
     try {
       var incoming = S.parseImport(text);
       var base = state.data;
@@ -956,6 +1017,7 @@
   }
 
   function restoreDefaults() {
+    if (!requireWritable()) return;
     if (!confirm('恢复默认示例数据？当前本浏览器中的自定义数据将丢失（不影响已发布的仓库文件）。')) return;
     state.data = S.defaultData();
     state.selectedIds = [];
@@ -966,6 +1028,7 @@
   }
 
   function clearProducts() {
+    if (!requireWritable()) return;
     if (!confirm('清空全部商品？此操作不可撤销。')) return;
     state.data.products = [];
     state.selectedIds = [];
@@ -989,6 +1052,7 @@
 
   /* ---------- 渲染总入口 ---------- */
   function renderAll() {
+    renderReadonlyBanner();
     renderOverview();
     renderProducts();
     renderCategories();
@@ -1000,6 +1064,7 @@
   var payCtrl = null;
 
   function init() {
+    loadGitState();
     document.documentElement.setAttribute('data-theme', S.getTheme());
     document.body.setAttribute('data-theme', S.getTheme());
 
@@ -1078,6 +1143,7 @@
 
     // 分类
     $('#addCatBtn').addEventListener('click', function () {
+      if (!requireWritable()) return;
       var name = $('#newCatName').value.trim();
       if (!name) { toast('请输入分类名称', 'error'); return; }
       if (state.data.categories.some(function (c) { return c.name === name; })) {
@@ -1092,12 +1158,14 @@
 
     // 站点设置
     $('#saveSiteBtn').addEventListener('click', function () {
+      if (!requireWritable()) return;
       collectSiteSettings();
       saveCurrent();
       renderOverview();
       toast('站点设置已保存，前台（本浏览器）可刷新预览', 'success');
     });
     $('#resetSiteBtn').addEventListener('click', function () {
+      if (!requireWritable()) return;
       if (!confirm('重置站点设置为本项目默认值？')) return;
       var d = S.defaultData();
       state.data.site = d.site;
@@ -1109,15 +1177,19 @@
     // GitHub
     $('#gitSaveBtn').addEventListener('click', function () {
       S.saveGitConfig(readGitForm());
+      renderReadonlyBanner();   // 配置变更后立即刷新只读锁状态
       toast('配置已保存到本浏览器', 'success');
     });
     $('#gitTestBtn').addEventListener('click', doTestConnection);
     $('#gitPublishBtn').addEventListener('click', doPublish);
     $('#gitClearBtn').addEventListener('click', function () {
-      if (!confirm('清除已保存的 GitHub 配置（Token）？')) return;
+      if (!confirm('清除已保存的 GitHub 配置（Token）？清除后后台将进入只读模式。')) return;
       S.clearGitConfig();
+      state.gitSync = null;
+      saveGitState();
       loadGitForm();
-      toast('已清除配置', 'success');
+      renderReadonlyBanner();
+      toast('已清除配置，后台进入只读模式', 'success');
     });
 
     bindDataEvents();

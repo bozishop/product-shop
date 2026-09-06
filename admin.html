@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>后台配置 · 拾光小铺</title>
-  <link rel="stylesheet" href="css/admin.css?v=2">
+  <link rel="stylesheet" href="css/admin.css?v=3">
 </head>
 <body data-theme="light">
 
@@ -45,6 +45,8 @@
     </aside>
 
     <main class="main" id="mainArea">
+      <!-- 只读锁提示条：GitHub 同步未验证可用时显示 -->
+      <div class="ro-lock hidden" id="roLockBar"></div>
       <!-- ======== 概览 ======== -->
       <section class="page active" id="page-overview">
         <h2 class="page-title">概览</h2>
@@ -387,7 +389,7 @@
 
   <div id="toast-wrap"></div>
 
-  <script src="js/store.js?v=2"></script>
-  <script src="js/admin.js?v=2"></script>
+  <script src="js/store.js?v=3"></script>
+  <script src="js/admin.js?v=3"></script>
 </body>
 </html>
