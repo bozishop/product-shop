@@ -87,6 +87,14 @@
       $('#noticeBar').style.display = 'none';
     }
     $('#footerText').textContent = site.footer;
+
+    // 隐藏后台入口：后台开启"隐藏前台后台入口"后，彻底移除 DOM（防君子）
+    if (site.hideAdminEntry) {
+      var adminEntry = document.getElementById('adminEntry');
+      var footerAdmin = document.getElementById('footerAdmin');
+      if (adminEntry) adminEntry.remove();
+      if (footerAdmin) footerAdmin.remove();
+    }
   }
 
   /* ---------- 渲染：轮播 ---------- */

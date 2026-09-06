@@ -184,6 +184,13 @@
             <label class="field-label">补充说明（可提示示例二维码）</label>
             <input class="input" id="site_paymentNote">
           </div>
+          <div class="form-group">
+            <label class="field-label">隐藏前台后台入口</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+              <input type="checkbox" id="site_hideAdminEntry"> 开启后前台不再显示「后台管理」和「后台配置」链接，仅能通过地址直接访问后台
+            </label>
+            <div class="form-hint">⚠️ 开启后请务必记住后台地址 <code>bozi_backend_admin.html</code>，否则将无法进入后台</div>
+          </div>
         </div>
 
         <div style="display:flex;gap:12px">

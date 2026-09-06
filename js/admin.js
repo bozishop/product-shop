@@ -963,6 +963,7 @@
     $('#site_footer').value = site.footer || '';
     $('#site_theme').value = site.theme || 'light';
     $('#site_showBanner').checked = !!site.showBanner;
+    $('#site_hideAdminEntry').checked = !!site.hideAdminEntry;
     $('#site_paymentImage').value = site.paymentImage || '';
     $('#site_paymentTip').value = site.paymentTip || '';
     $('#site_paymentNote').value = site.paymentNote || '';
@@ -1047,6 +1048,7 @@
     state.data.site.footer = $('#site_footer').value.trim();
     state.data.site.theme = $('#site_theme').value;
     state.data.site.showBanner = $('#site_showBanner').checked;
+    state.data.site.hideAdminEntry = $('#site_hideAdminEntry').checked;
     state.data.site.banners = clean;
     state.data.site.paymentImage = payCtrl.getValue();
     state.data.site.paymentTip = $('#site_paymentTip').value.trim();

@@ -3,7 +3,7 @@
 纯 HTML + CSS + 原生 JavaScript 实现的商品展示站点，**零依赖、零构建**，克隆/上传到 GitHub 仓库并开启 Pages 即可访问。包含：
 
 - **前台 `index.html`**：商品卡片网格、分类筛选、搜索、排序、分页、详情弹窗（富文本，支持 Word 排版）、点击「立即购买」弹出收款二维码、明暗主题、响应式布局。
-- **后台 `admin.html`**：登录保护、商品增删改查、富文本详情（兼容 Word 粘贴）、分类管理、站点设置（标题/公告/轮播/收款码）、图片上传（GitHub API 一键上传 + base64 降级）、一键发布、数据导入导出。
+- **后台 `bozi_backend_admin.html`**：登录保护、商品增删改查、富文本详情（兼容 Word 粘贴）、分类管理、站点设置（标题/公告/轮播/收款码）、图片上传（GitHub API 一键上传 + base64 降级）、一键发布、数据导入导出。
 
 ---
 
@@ -16,7 +16,7 @@
 cd product-shop
 python -m http.server 8000
 # 然后访问 http://localhost:8000/index.html
-# 后台 http://localhost:8000/admin.html  默认密码 admin123
+# 后台 http://localhost:8000/bozi_backend_admin.html  默认密码 admin123
 ```
 
 > 也可以用 VS Code 的 Live Server 插件。
@@ -49,7 +49,7 @@ git push -u origin main
 网站数据存在 `products.json`（仓库根目录），后台的每次编辑会先写入**当前浏览器 localStorage**（仅自己可见的预览），要让大家看到，有两种方式：
 
 ### 方式 A：后台「一键发布」（推荐）
-1. 打开 `admin.html` → GitHub 同步 页面；
+1. 打开 `bozi_backend_admin.html` → GitHub 同步 页面；
 2. 填写 **owner / repo / Token / 分支(默认 main)**；
 3. 点「测试连接」→ 成功后点「🚀 一键发布数据」；
 4. 约 1 分钟内所有访客即可看到新内容。
@@ -87,7 +87,7 @@ git push
 ```
 product-shop/
 ├── index.html           前台商品展示页
-├── admin.html           后台配置页
+├── bozi_backend_admin.html   后台配置页
 ├── products.json        公开商品数据（前台读取）
 ├── css/
 │   ├── main.css         前台样式

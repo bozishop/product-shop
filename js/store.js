@@ -54,7 +54,7 @@
       title: '拾光小铺', subtitle: '用心挑选每一件好物',
       notice: '🎉 全场满 99 元包邮，新用户立减 10 元',
       footer: '© 2026 拾光小铺 · GitHub Pages 静态展示站',
-      theme: 'light', showBanner: true,
+      theme: 'light', showBanner: true, hideAdminEntry: false,
       banners: ['images/banner-1.svg', 'images/banner-2.svg', 'images/banner-3.svg'],
       paymentImage: 'images/pay-code.svg',
       paymentTip: '请用微信或支付宝扫码支付',
