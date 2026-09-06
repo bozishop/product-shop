@@ -216,13 +216,18 @@
   }
 
   function githubErrorText(status, data) {
-    var msg = data && data.message ? data.message : '未知错误';
+    var msg = data && data.message ? data.message : '';
     if (status === 401) return '认证失败：Token 无效或已过期';
     if (status === 403) return '没有权限：请确认 Token 已勾选 repo 权限，或触发频率限制';
-    if (status === 404) return '仓库不存在或路径错误，请确认 owner/repo 填写正确';
+    if (status === 404) return '仓库不存在或路径错误，请确认 owner/repo 填写正确，或文件尚未创建';
     if (status === 409) return '分支冲突：请确认分支名（默认 main）正确且仓库可写';
-    if (status === 422) return '内容校验失败，请重试';
-    return '请求失败 (' + status + ')：' + msg;
+    if (status === 422) {
+      var detail = (data && data.errors && data.errors)
+        .map(function (e) { return e.message || e.field || e.code || ''; })
+        .filter(Boolean).join('；');
+      return '内容校验失败：' + (detail || msg || '请重试');
+    }
+    return '请求失败 (' + status + ')：' + (msg || '未知错误');
   }
 
   async function ghRequest(cfg, method, path, body) {
@@ -245,6 +250,29 @@
     return data;
   }
 
+  // 获取仓库中某文件当前的 sha（更新已有文件时所必需）；文件不存在返回 null
+  async function getFileSha(cfg, path) {
+    var url = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) +
+      '/' + encodeURIComponent(cfg.repo) + '/contents/' + path +
+      '?ref=' + encodeURIComponent(cfg.branch);
+    var res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + cfg.token,
+        'Accept': 'application/vnd.github+json'
+      }
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) {
+      var data = {};
+      try { data = await res.json(); } catch (e) { /* ignored */ }
+      throw new Error(githubErrorText(res.status, data));
+    }
+    var body = {};
+    try { body = await res.json(); } catch (e) { /* ignored */ }
+    return (body && body.sha) ? body.sha : null;
+  }
+
   // 上传文件到仓库 images/ 目录，返回相对路径 images/xxx.ext
   async function uploadImage(cfg, content, fileExt, prefix) {
     fileExt = (fileExt || 'png').replace(/[^\w.]/g, '');
@@ -255,6 +283,9 @@
       content: content,
       branch: cfg.branch
     };
+    // 若同名文件已存在（重名覆盖场景），更新时必须携带旧文件 sha
+    var sha = await getFileSha(cfg, path);
+    if (sha) body.sha = sha;
     await ghRequest(cfg, 'PUT', path, body);
     return path;
   }
@@ -268,6 +299,9 @@
       content: base64,
       branch: cfg.branch
     };
+    // 关键修复：products.json 已存在时必须携带旧文件 sha，否则 GitHub 返回 422
+    var sha = await getFileSha(cfg, 'products.json');
+    if (sha) body.sha = sha;
     await ghRequest(cfg, 'PUT', 'products.json', body);
   }
 
@@ -341,6 +375,7 @@
     getGitConfig: getGitConfig,
     saveGitConfig: saveGitConfig,
     clearGitConfig: clearGitConfig,
+    getFileSha: getFileSha,
     uploadImage: uploadImage,
     publishJSON: publishJSON,
     testConnection: testConnection,
