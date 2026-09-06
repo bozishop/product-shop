@@ -32,24 +32,21 @@
   ],
   "products": [
     {
-      "id": "p_1001",
-      "name": "极简陶瓷马克杯",
+      "id": "p_mtpt6xei_odb75n",
+      "name": "测试商品",
       "category": "新品",
-      "price": 39,
-      "originalPrice": 59,
-      "stock": 120,
-      "sales": 86,
-      "rating": 4.9,
-      "tags": [
-        "新品",
-        "简约"
-      ],
-      "image": "images/img_mtps140s.jpg",
-      "createdAt": "2026-01-10T10:00:00.000Z",
-      "description": "<p>一杯温柔的日常，从一只好杯子开始。</p><ul><li>材质：高温白瓷</li><li>容量：350ml</li></ul><blockquote>设计师手作款。</blockquote>",
-      "active": true,
+      "price": 55,
+      "originalPrice": 0,
+      "stock": 100,
+      "sales": 22,
+      "rating": 5,
+      "tags": [],
+      "image": "images/img_mtpt5rgc.png",
       "link": "",
-      "updatedAt": "2026-09-06T12:20:44.259Z"
+      "active": true,
+      "description": "这是件测试商品<img src=\"images/rte_mtptxb3g.jpg\">",
+      "createdAt": "2026-09-06T12:49:44.346Z",
+      "updatedAt": "2026-09-06T13:10:29.564Z"
     },
     {
       "id": "p_1002",
@@ -64,12 +61,12 @@
         "新品",
         "家居"
       ],
-      "image": "images/product-2.svg",
+      "image": "images/img_mtpscrd4.jpg",
       "createdAt": "2026-01-08T09:30:00.000Z",
       "description": "<p>天然黑胡桃木，纹理清晰。</p><p>随赠 <strong>雪松精油 5ml</strong>。</p>",
       "active": true,
       "link": "",
-      "updatedAt": ""
+      "updatedAt": "2026-09-06T12:28:00.152Z"
     },
     {
       "id": "p_1003",
@@ -84,12 +81,12 @@
         "热卖",
         "数码"
       ],
-      "image": "images/product-3.svg",
+      "image": "images/img_mtptmncw.jpg",
       "createdAt": "2026-01-05T14:00:00.000Z",
       "description": "<p>小巧机身，澎湃音效。</p><ul><li>蓝牙 5.3</li><li>续航约 12 小时</li><li>IPX5 防水</li></ul>",
       "active": true,
       "link": "",
-      "updatedAt": ""
+      "updatedAt": "2026-09-06T13:02:11.272Z"
     },
     {
       "id": "p_1004",
@@ -125,10 +122,10 @@
       ],
       "image": "images/product-5.svg",
       "createdAt": "2025-12-28T16:40:00.000Z",
-      "description": "<p>加厚帆布，大容量。</p><p><strong>清仓特惠，售完即止。</strong></p>",
+      "description": "<p>加厚帆布，大容量。</p><p><strong>清仓特惠，售完即止。</strong></p><p><img src=\"images/rte_mtpubiy4.png\" alt=\"pasted\"></p><p><span style=\"font-family: 宋体;\">测阿斯顿</span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</p>",
       "active": true,
       "link": "",
-      "updatedAt": ""
+      "updatedAt": "2026-09-06T13:22:04.425Z"
     },
     {
       "id": "p_1006",
