@@ -156,6 +156,7 @@
       var localHash = hashText(localText);
       if (base && localHash === base) { adoptPublished(parsed, true); return; } // 本地自上次发布后没改过 → 线上是最新
       if (!base && localHash === hashText(comparableText(S.defaultData()))) { adoptPublished(parsed, true); return; } // 全新浏览器 → 直接采用线上
+      if ((state.data.products || []).length === 0 && parsed.products.length > 0) { adoptPublished(parsed, true); return; } // 本地商品列表为空（无效缓存）→ 直接采用线上
       if (pubHashOnline(base, pubText)) return; // 线上与上次发布一致 → 本地有未发布修改，不打扰
       showSyncBar(parsed);                      // 双方都有改动 → 让用户选择
     }).catch(function () { /* 离线或数据不可用：静默跳过 */ });
@@ -257,11 +258,41 @@
     syncAfterLogin(); // 登录后拉取线上最新发布数据并智能同步
   }
 
+  // 是否有未发布的内容修改（无基线记录时按有修改处理，保守提醒）
+  function hasUnpublishedChanges() {
+    var base = getLastPubHash();
+    if (!base) return true;
+    return hashText(comparableText(state.data)) !== base;
+  }
+
   function logout() {
+    var gitOk = gitSyncState() === 'ok';
+    var unpublished = hasUnpublishedChanges();
+    var msg;
+    if (!gitOk) {
+      // GitHub 同步不可用：数据只存在本浏览器，清除 = 永久丢失
+      msg = '⚠️ 警告：当前未配置可用的 GitHub 同步，数据仅保存在本浏览器！\n\n退出登录将清除本地缓存，所有内容修改将无法找回。\n\n确定退出登录吗？';
+    } else if (unpublished) {
+      // 有未发布的修改：提醒先发布，否则修改丢失（线上不受影响）
+      msg = '⚠️ 检测到有未发布的内容修改！\n\n退出登录将清除本浏览器缓存的店铺数据，未发布的修改将丢失（已发布到线上的内容不受影响）。\n\n如需保留修改，请先到「GitHub 同步」点击「🚀 一键发布数据」。\n\n确定退出登录吗？';
+    } else {
+      // 已与线上一致：清除是安全的，下次登录自动拉取线上最新
+      msg = '退出登录将清除本浏览器缓存的店铺数据，下次登录将自动获取线上最新数据。\n\n（已发布到线上的内容不受影响）\n\n确定退出登录吗？';
+    }
+    if (!confirm(msg)) return;
+    // 确认退出：清除本地内容缓存（保留主题 / 登录密码 / GitHub 配置与验证状态）
+    S.resetLocal();
+    try { localStorage.removeItem('ps_lastpub_v1'); } catch (e) {}
     S.setAdminAuthed(false);
+    state.data = S.defaultData();
+    state.selectedIds = [];
+    state.search = '';
+    state.catFilter = '';
     $('#loginPwd').value = '';
     $('#login-page').classList.remove('hidden');
     $('#app').classList.add('hidden');
+    hideSyncBar();
+    toast('已退出登录，本地缓存已清除', 'info');
   }
 
   /* ---------- 导航 ---------- */
