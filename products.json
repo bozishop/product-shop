@@ -14,7 +14,9 @@
     ],
     "paymentImage": "images/pay-code.svg",
     "paymentTip": "请使用微信或支付宝扫码支付，付款后截图联系客服确认订单哦～",
-    "paymentNote": "以上二维码为示例，请在后台配置页替换为您的真实收款码"
+    "paymentNote": "以上二维码为示例，请在后台配置页替换为您的真实收款码",
+    "adminPasswordHash": "sha256$475ddda1d659e4e2$e3bc4e2877d06f9efd90bd0dfb1ba04d8ae315183ea727c2319f29f8f34575e2",
+    "rawBase": "https://raw.githubusercontent.com/bozishop/product-shop/main"
   },
   "categories": [
     {
