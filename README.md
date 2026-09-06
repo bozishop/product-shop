@@ -56,6 +56,8 @@ git push -u origin main
 
 同时「上传图片」功能也会直接提交到仓库 `images/` 目录并自动写回相对路径。
 
+> 💡 **上传图片后无需等待 Pages 部署，前台可立即显示**：前台/后台的所有商品图、轮播图、收款码均内置了「raw 直链自动升级」——当相对路径 `images/xxx.jpg` 在 Pages 部署延迟窗口内 404 时，会自动改用 `raw.githubusercontent.com/<owner>/<repo>/main/images/xxx.jpg` 直链加载（图片 commit 落盘即可访问，秒级生效），部署完成后自动回到正式路径。此机制仅在 `*.github.io` 域名下启用，本地开发与外链图片不受影响。
+
 ### 方式 B：手动导出 + push
 1. 后台「数据管理」→ 下载 `products.json`；
 2. 替换仓库根目录里的 `products.json`；
@@ -107,6 +109,7 @@ product-shop/
 | 双击打开没有轮播/公告？ | 浏览器 file 协议禁止 fetch，改用 `python -m http.server` 或部署后访问 |
 | 前台看不到后台改的数据？ | 只改了本浏览器 localStorage；请「一键发布」或手动 push products.json |
 | 上传图片报 403？ | Token 权限不足，请确认勾选 `repo`；或检查分支名 |
+| 刚上传的图片 404？ | Pages 部署有 1~2 分钟延迟；前台会自动改用 raw 直链立即显示，正式路径稍后自动恢复 |
 | 前台没有商品？ | 检查 `products.json` 是否有 `products` 数组，且商品 `active: true` |
 | 想清掉本地预览数据？ | 后台「数据管理」→ 恢复默认示例数据；或浏览器清除该站点 localStorage |
 

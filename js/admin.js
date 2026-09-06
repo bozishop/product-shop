@@ -269,8 +269,6 @@
     $('#p_sales').value = p ? p.sales : '';
     $('#p_rating').value = p ? p.rating : 5;
     $('#p_tags').value = p && p.tags ? p.tags.join(',') : '';
-    $('#p_image').value = p ? p.image : '';
-    $('#p_imgPreview').src = p && p.image ? p.image : '';
     $('#p_link').value = p ? p.link : '';
     $('#p_active').checked = p ? p.active : true;
     setImgCtrlValue(p && p.image ? p.image : '');
