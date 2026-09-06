@@ -139,7 +139,8 @@ label.field-label { display: block; font-size: 13px; color: var(--muted); margin
 .table tr:hover td { background: var(--primary-light); }
 .table .thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; background: #eee; }
 [data-theme="dark"] .table .thumb { background: #232632; }
-.table .actions { display: flex; gap: 6px; justify-content: flex-end; }
+.table .actions { text-align: right; white-space: nowrap; }
+.table .actions .btn + .btn { margin-left: 6px; }
 .tag-pill {
   display: inline-block; padding: 2px 8px; border-radius: 6px;
   background: var(--primary-light); color: var(--primary); font-size: 12px; margin-right: 4px;
