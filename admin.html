@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>后台配置 · 拾光小铺</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body data-theme="light">
+
+  <!-- ======== 登录页 ======== -->
+  <div id="login-page">
+    <div class="login-card">
+      <div class="login-logo">🛒</div>
+      <h1>后台管理系统</h1>
+      <div class="login-sub">录入密码后进入商品配置</div>
+      <div class="form-group">
+        <input type="password" class="input" id="loginPwd" placeholder="请输入管理密码" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-block" id="loginBtn">登 录</button>
+      <div class="login-hint">默认密码：admin123（登录后请尽快在「修改密码」中更换）</div>
+    </div>
+  </div>
+
+  <!-- ======== 后台主界面 ======== -->
+  <div id="app" class="hidden">
+    <aside class="sidebar">
+      <div class="admin-brand">
+        🛒 拾光小铺
+        <small>后台配置中心</small>
+      </div>
+      <nav class="nav-list" id="navList">
+        <button class="nav-item active" data-page="overview">📊 概览</button>
+        <button class="nav-item" data-page="products">📦 商品管理</button>
+        <button class="nav-item" data-page="categories">🏷️ 分类管理</button>
+        <button class="nav-item" data-page="site">⚙️ 站点设置</button>
+        <button class="nav-item" data-page="github">🔗 GitHub 同步</button>
+        <button class="nav-item" data-page="data">🗂️ 数据管理</button>
+        <button class="nav-item" data-page="password">🔒 修改密码</button>
+      </nav>
+      <div class="sidebar-footer">
+        <a class="btn btn-sm" href="index.html" target="_blank">👀 查看前台</a>
+        <button class="btn btn-sm btn-danger" id="logoutBtn">🚪 退出登录</button>
+      </div>
+    </aside>
+
+    <main class="main" id="mainArea">
+      <!-- ======== 概览 ======== -->
+      <section class="page active" id="page-overview">
+        <h2 class="page-title">概览</h2>
+        <p class="page-sub">当前店铺数据总览（数据保存在本浏览器 localStorage，未发布不影响前台默认展示）</p>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="card">
+          <div class="card-title">📢 使用提示</div>
+          <div class="alert info">
+            ① 在「商品管理 / 分类管理 / 站点设置」中编辑内容 → 保存后 <b>本浏览器</b> 前台立即生效（预览）。<br>
+            ② 需要让<b>所有访客</b>看到新内容：在「GitHub 同步」中配置仓库并「一键发布」，或到「数据管理」导出 products.json 后手动 push。<br>
+            ③ 上传图片：在商品主图 / 轮播 / 收款码处选择本地文件后，点击「上传到 GitHub 仓库」即可把图片提交到 <code>images/</code> 目录。
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== 商品管理 ======== -->
+      <section class="page" id="page-products">
+        <h2 class="page-title">商品管理</h2>
+        <p class="page-sub">新增、编辑、删除商品，设置主图与富文本详情</p>
+        <div class="list-toolbar">
+          <div class="search-box" style="position:relative">
+            <input class="input" id="productSearch" placeholder="搜索商品…" style="width:220px">
+          </div>
+          <select class="select" id="productCatFilter" style="width:150px">
+            <option value="">全部分类</option>
+          </select>
+          <div class="spacer"></div>
+          <button class="btn btn-danger btn-sm" id="bulkDeleteBtn" disabled>🗑 批量删除</button>
+          <button class="btn btn-primary" id="addProductBtn">＋ 新增商品</button>
+        </div>
+        <div class="card table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:36px"><input type="checkbox" id="checkAll"></th>
+                <th>图片</th>
+                <th>名称</th>
+                <th>分类</th>
+                <th>售价</th>
+                <th>库存</th>
+                <th>销量</th>
+                <th>评分</th>
+                <th>状态</th>
+                <th style="text-align:right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="productTbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="productEmpty" style="display:none;text-align:center;padding:40px;color:var(--muted)">暂无商品，点击右上角「新增商品」开始</div>
+      </section>
+
+      <!-- ======== 分类管理 ======== -->
+      <section class="page" id="page-categories">
+        <h2 class="page-title">分类管理</h2>
+        <p class="page-sub">自定义前台分类（随时增删改，删除后该分类商品显示为「未分类」）</p>
+        <div class="card" style="margin-bottom:16px">
+          <div class="form-row" style="align-items:end">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="field-label">新分类名称</label>
+              <input class="input" id="newCatName" placeholder="如：限时秒杀" style="max-width:320px">
+            </div>
+            <button class="btn btn-primary" id="addCatBtn">添加分类</button>
+          </div>
+        </div>
+        <div class="cat-list" id="catList"></div>
+      </section>
+
+      <!-- ======== 站点设置 ======== -->
+      <section class="page" id="page-site">
+        <h2 class="page-title">站点设置</h2>
+        <p class="page-sub">配置前台站点标题、公告、轮播与收款码</p>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">🏠 基础信息</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="field-label">站点标题</label>
+              <input class="input" id="site_title">
+            </div>
+            <div class="form-group">
+              <label class="field-label">副标题</label>
+              <input class="input" id="site_subtitle">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-label">公告条（留空则不显示）</label>
+            <input class="input" id="site_notice">
+          </div>
+          <div class="form-group">
+            <label class="field-label">页脚文案</label>
+            <input class="input" id="site_footer">
+          </div>
+          <div class="form-group">
+            <label class="field-label">默认主题</label>
+            <select class="select" id="site_theme" style="max-width:200px">
+              <option value="light">浅色</option>
+              <option value="dark">深色</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">🖼️ 轮播 Banner（最多 3 张，可关闭）</div>
+          <div class="form-group" style="display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="site_showBanner"> <span>在前台显示轮播</span>
+          </div>
+          <div id="bannerList"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">💳 收款码（点击「立即购买」弹出）</div>
+          <div class="form-group">
+            <label class="field-label">收款二维码图片</label>
+            <div class="img-upload-row">
+              <img class="img-preview" id="site_payPreview" src="" alt="">
+              <div style="flex:1">
+                <input class="input" id="site_paymentImage" placeholder="images/pay-code.svg 或外链图片地址">
+                <div class="form-hint">选择本地二维码图片后，可一键上传到仓库 images 目录。</div>
+                <div class="img-btns" style="flex-direction:row;margin-top:8px">
+                  <input type="file" id="site_payFile" accept="image/*" style="display:none">
+                  <button type="button" class="btn btn-sm" id="site_payPick">选择本地图片</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="site_payUploadGit">上传到 GitHub 仓库</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-label">购买弹窗提示语</label>
+            <input class="input" id="site_paymentTip">
+          </div>
+          <div class="form-group">
+            <label class="field-label">补充说明（可提示示例二维码）</label>
+            <input class="input" id="site_paymentNote">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px">
+          <button class="btn btn-primary" id="saveSiteBtn">💾 保存站点设置</button>
+          <button class="btn" id="resetSiteBtn">重置为默认</button>
+        </div>
+      </section>
+
+      <!-- ======== GitHub 同步 ======== -->
+      <section class="page" id="page-github">
+        <h2 class="page-title">GitHub 同步</h2>
+        <p class="page-sub">配置仓库后，可一键上传图片、一键发布 products.json（全站访客立即生效）</p>
+
+        <div class="alert warn" style="margin-bottom:16px">
+          ⚠️ <b>安全提醒</b>：Token 类似仓库钥匙，仅保存在<b>你自己浏览器的 localStorage</b>，不会写入任何会公开的文件。请勿把 Token 发给他人。建议在 GitHub「Settings → Developer settings → Personal access tokens」中创建，勾选 <code>repo</code> 权限，并将其权限范围限定在本仓库（Fine-grained token 可选指定仓库）。
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">🔑 仓库配置</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="field-label">仓库所属者（owner）</label>
+              <input class="input" id="git_owner" placeholder="如：yourname">
+            </div>
+            <div class="form-group">
+              <label class="field-label">仓库名（repo）</label>
+              <input class="input" id="git_repo" placeholder="如：product-shop">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="field-label">分支（默认 main）</label>
+              <input class="input" id="git_branch" placeholder="main">
+            </div>
+            <div class="form-group">
+              <label class="field-label">Personal Access Token</label>
+              <input class="input" id="git_token" type="password" placeholder="ghp_… / github_pat_…">
+            </div>
+          </div>
+          <div class="alert info" id="githubStatus" style="display:none;margin-bottom:12px"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" id="gitSaveBtn">💾 保存配置</button>
+            <button class="btn btn-primary" id="gitTestBtn">🔍 测试连接</button>
+            <button class="btn btn-success" id="gitPublishBtn">🚀 一键发布数据（products.json）</button>
+            <button class="btn btn-danger" id="gitClearBtn">清除配置</button>
+          </div>
+          <div class="form-hint" style="margin-top:10px">
+            发布成功约 1 分钟内 GitHub Pages 站点即可看到新内容。若未配置，可走「数据管理」手动导出并 push。
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== 数据管理 ======== -->
+      <section class="page" id="page-data">
+        <h2 class="page-title">数据管理</h2>
+        <p class="page-sub">导入 / 导出全量数据，或恢复默认示例数据</p>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">📤 导出</div>
+          <div class="alert info">把当前数据（商品 + 分类 + 站点配置）导出为 products.json，替换仓库根目录文件后 push 即可全站生效。</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="exportBtn">⬇️ 下载 products.json</button>
+            <button class="btn" id="copyJsonBtn">📋 复制 JSON 到剪贴板</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">📥 导入</div>
+          <div class="form-group">
+            <label class="field-label">粘贴 JSON 数据（支持完整数据 或 {products:[...]}）</label>
+            <textarea class="textarea" id="importText" placeholder='{"products":[{...}]}' style="min-height:120px"></textarea>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+            <button class="btn" id="importFileBtn">📂 选择 JSON 文件</button>
+            <button class="btn btn-primary" id="importTextBtn">导入粘贴内容</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">♻️ 恢复与清空</div>
+          <div class="alert danger" style="margin-bottom:12px">「恢复默认」会丢弃本浏览器当前全部自定义数据；「清空商品」只清空商品列表。</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" id="defaultBtn">♻️ 恢复默认示例数据</button>
+            <button class="btn btn-danger" id="clearProductsBtn">🗑 清空全部商品</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== 修改密码 ======== -->
+      <section class="page" id="page-password">
+        <h2 class="page-title">修改密码</h2>
+        <p class="page-sub">密码保存在本浏览器 localStorage，修改后下次登录生效</p>
+        <div class="card" style="max-width:480px">
+          <div class="form-group">
+            <label class="field-label">当前密码</label>
+            <input class="input" id="pwd_old" type="password" autocomplete="current-password">
+          </div>
+          <div class="form-group">
+            <label class="field-label">新密码</label>
+            <input class="input" id="pwd_new" type="password" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label class="field-label">确认新密码</label>
+            <input class="input" id="pwd_confirm" type="password" autocomplete="new-password">
+          </div>
+          <button class="btn btn-primary" id="pwdChangeBtn">更新密码</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ======== 商品编辑弹窗 ======== -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="productModalTitle">新增商品</h3>
+        <button class="modal-close" id="productModalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm" autocomplete="off">
+          <input type="hidden" id="p_id">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="field-label">商品名称 *</label>
+              <input class="input" id="p_name" required placeholder="如：极简陶瓷马克杯">
+            </div>
+            <div class="form-group">
+              <label class="field-label">分类</label>
+              <select class="select" id="p_category"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="field-label">售价（¥）*</label>
+              <input class="input" id="p_price" type="number" step="0.01" min="0" required placeholder="39">
+            </div>
+            <div class="form-group">
+              <label class="field-label">原价 / 划线价（¥）</label>
+              <input class="input" id="p_original" type="number" step="0.01" min="0" placeholder="59">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="field-label">库存（件）</label>
+              <input class="input" id="p_stock" type="number" min="0" placeholder="100">
+            </div>
+            <div class="form-group">
+              <label class="field-label">销量（件）</label>
+              <input class="input" id="p_sales" type="number" min="0" placeholder="0">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="field-label">评分（0~5）</label>
+              <input class="input" id="p_rating" type="number" step="0.1" min="0" max="5" placeholder="4.8">
+            </div>
+            <div class="form-group">
+              <label class="field-label">标签（逗号分隔）</label>
+              <input class="input" id="p_tags" placeholder="新品,简约">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-label">商品主图</label>
+            <div class="img-upload-row">
+              <img class="img-preview" id="p_imgPreview" src="" alt="">
+              <div style="flex:1">
+                <input class="input" id="p_image" placeholder="图片地址（支持仓库相对路径 images/xxx.jpg / 外链 / base64）">
+                <div class="form-hint">选择本地图片可「上传到 GitHub 仓库」直接提交至 images/ 目录，或「用 base64 本地保存」。</div>
+                <div class="img-btns" style="flex-direction:row;margin-top:8px">
+                  <input type="file" id="p_imgFile" accept="image/*" style="display:none">
+                  <button type="button" class="btn btn-sm" id="p_imgPick">选择本地图片</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="p_imgUploadGit">上传到 GitHub 仓库</button>
+                  <button type="button" class="btn btn-sm" id="p_imgUseBase64">用 base64 本地保存</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-label">购买外链（可选，前台显示「查看外链」按钮）</label>
+            <input class="input" id="p_link" placeholder="https://…（如淘宝/京东商品链接）">
+          </div>
+          <div class="form-group">
+            <label class="field-label">上架状态</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+              <input type="checkbox" id="p_active" checked> 前台展示该商品
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="field-label">商品详情（富文本）— 支持从 Word 直接复制粘贴</label>
+            <div class="rte-wrap">
+              <div class="rte-toolbar" id="rteToolbar"></div>
+              <div class="rte-area" id="rteDesc" contenteditable="true"></div>
+            </div>
+            <div class="form-hint">💡 从 Word/WPS 复制内容直接粘贴即可；若粘贴了 base64 图片，点工具栏「上传粘贴图片」可转存到仓库。</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="productModalCancel">取消</button>
+        <button class="btn btn-primary" id="productModalSave">保存商品</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+
+  <script src="js/store.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

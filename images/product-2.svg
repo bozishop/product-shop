@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#g)"/>
+  <text x="300" y="270" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="42" fill="#fff" text-anchor="middle" font-weight="bold">🕯️ 北欧实木香薰摆件</text>
+  <text x="300" y="340" font-family="Arial" font-size="26" fill="rgba(255,255,255,.85)" text-anchor="middle">¥89 · 黑胡桃木 · 附赠精油</text>
+  <circle cx="300" cy="430" r="52" fill="rgba(255,255,255,.18)"/>
+</svg>

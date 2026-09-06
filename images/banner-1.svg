@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="450" viewBox="0 0 1200 450">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="0.5" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#c026d3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="450" fill="url(#g)"/>
+  <text x="600" y="210" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="64" fill="#fff" text-anchor="middle" font-weight="bold">🎉 新店开张 全场 9 折</text>
+  <text x="600" y="286" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="28" fill="rgba(255,255,255,.9)" text-anchor="middle">用心挑选每一件好物 · 满 99 包邮</text>
+</svg>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拾光小铺</title>
+  <meta name="description" content="基于 GitHub Pages 的静态商品展示页">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body data-theme="light">
+  <!-- 公告条 -->
+  <div class="notice-bar" id="noticeBar" style="display:none"></div>
+
+  <!-- 顶栏 -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-title" id="brandTitle">拾光小铺</div>
+        <div class="brand-sub" id="brandSub">用心挑选每一件好物</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn" title="切换主题" aria-label="切换主题">🌙</button>
+        <a href="admin.html" class="btn btn-ghost btn-sm">后台管理</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 轮播 -->
+  <div class="container">
+    <div class="banner-wrap" id="bannerWrap" style="display:none">
+      <div class="banner-track" id="bannerTrack"></div>
+      <span class="banner-dots" id="bannerDots"></span>
+      <button class="banner-arrow prev" id="bannerPrev" aria-label="上一张">‹</button>
+      <button class="banner-arrow next" id="bannerNext" aria-label="下一张">›</button>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="shop-toolbar">
+      <div class="cat-tabs" id="catTabs"></div>
+      <div class="toolbar-right">
+        <div class="search-box">
+          <input type="search" id="searchInput" placeholder="搜索商品…" autocomplete="off">
+          <span class="search-icon">🔍</span>
+        </div>
+        <select class="sort-select" id="sortSelect" title="排序方式">
+          <option value="default">默认排序</option>
+          <option value="new">最新上架</option>
+          <option value="price-asc">价格从低到高</option>
+          <option value="price-desc">价格从高到低</option>
+          <option value="sales-desc">销量优先</option>
+          <option value="rating-desc">评分优先</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="result-info" id="resultInfo"></div>
+
+    <!-- 加载态 -->
+    <div id="loading"><div class="spinner"></div><span>正在加载商品…</span></div>
+
+    <!-- 商品网格 -->
+    <div class="product-grid" id="productGrid"></div>
+
+    <!-- 空状态 -->
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-icon">🔍</div>
+      <p id="emptyText">没有找到相关商品</p>
+    </div>
+
+    <!-- 分页 -->
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="site-footer">
+    <div id="footerText">© 2026 拾光小铺</div>
+    <div style="margin-top:6px">基于 GitHub Pages 的静态展示 · <a href="admin.html">后台配置</a></div>
+  </footer>
+
+  <!-- 商品详情弹窗 -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal">
+      <button class="modal-close" data-close="detailModal" aria-label="关闭">✕</button>
+      <div class="modal-body">
+        <div class="detail-layout">
+          <div class="detail-media"><img id="detailImg" src="" alt=""></div>
+          <div class="detail-info">
+            <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
+              <span class="detail-cat" id="detailCat"></span>
+              <span class="detail-tags" id="detailTags"></span>
+            </div>
+            <h2 class="detail-name" id="detailName"></h2>
+            <div class="detail-price-row">
+              <span class="detail-price"><span class="unit">¥</span><span id="detailPrice"></span></span>
+              <span class="detail-original" id="detailOriginal"></span>
+            </div>
+            <div class="detail-meta-list" id="detailMeta"></div>
+            <div class="detail-desc" id="detailDesc"></div>
+            <div class="detail-actions">
+              <button class="btn btn-primary" id="buyBtn">立即购买</button>
+              <a class="btn" id="externalLink" href="#" target="_blank" rel="noopener" style="display:none">查看外链</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 支付码弹窗 -->
+  <div class="modal-overlay" id="payModal">
+    <div class="modal pay-modal">
+      <button class="modal-close" data-close="payModal" aria-label="关闭">✕</button>
+      <div class="pay-head"><h3>扫码支付</h3></div>
+      <div class="pay-img-wrap"><img id="payImg" src="" alt="收款二维码"></div>
+      <div class="pay-tip" id="payTip"></div>
+      <div class="pay-note" id="payNote"></div>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+
+  <script src="js/store.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
