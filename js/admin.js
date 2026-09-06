@@ -475,7 +475,17 @@
     H1: 1, H2: 1, H3: 1, H4: 1, UL: 1, OL: 1, LI: 1, BLOCKQUOTE: 1,
     IMG: 1, A: 1, SPAN: 1, FONT: 1, TABLE: 1, THEAD: 1, TBODY: 1, TR: 1, TD: 1, TH: 1
   };
+  // 连同内容一起整体删除的标签（其内容是 CSS/JS 文本，展开会裸露成正文）
+  var DROP_TAGS = { STYLE: 1, SCRIPT: 1, TITLE: 1, META: 1, LINK: 1, XML: 1, HEAD: 1 };
   var ALLOWED_STYLES = ['color', 'background-color', 'font-size', 'font-weight', 'font-style', 'text-decoration', 'text-align', 'font-family'];
+
+  function makeWordImgTip() {
+    var ph = document.createElement('p');
+    ph.className = 'word-img-tip';
+    ph.style.cssText = 'border:1px dashed #f0a020;background:rgba(240,160,32,.08);color:#b06f00;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.6';
+    ph.textContent = '⚠ Word 文档中的图片无法直接粘贴（浏览器安全限制，无法读取本地临时文件）。请对图片截图后按 Ctrl+V 粘贴，或使用工具栏「插入图片」上传。';
+    return ph;
+  }
 
   function sanitizeHtml(html) {
     if (!html) return '';
@@ -489,12 +499,22 @@
         if (child.nodeType === 3) return; // 文本
         if (child.nodeType !== 1) { child.remove(); return; }
         var tag = child.tagName.toUpperCase();
+        if (DROP_TAGS[tag] === 1) { child.remove(); return; } // style/script 等连内容一起删，避免 CSS 裸露
         if (ALLOWED_TAGS[tag] !== 1) {
           var kids = Array.prototype.slice.call(child.childNodes);
           child.replaceWith.apply(child, kids);
           kids.forEach(clean);
           return;
         }
+
+        // 图片 src 白名单：file://（Word 本地临时图，浏览器无法读取）等一律替换为操作指引
+        if (tag === 'IMG') {
+          var src = (child.getAttribute('src') || '').trim();
+          var ok = /^https?:\/\//i.test(src) || /^data:image\//i.test(src)
+            || /^images\//i.test(src) || /^\//.test(src) && !/^\/\//.test(src);
+          if (!ok) { child.replaceWith(makeWordImgTip()); return; }
+        }
+
         var attrs = Array.prototype.slice.call(child.attributes);
         attrs.forEach(function (a) {
           var name = a.name.toLowerCase();
@@ -545,6 +565,28 @@
     var area = $('#rteDesc');
     area.addEventListener('paste', function (e) {
       e.preventDefault();
+      // ① 剪贴板直接带图片二进制（截图工具 / 复制的图片 / 微信 QQ 图片）→ 转 base64 插入
+      var items = e.clipboardData && e.clipboardData.items;
+      var imgItem = null;
+      if (items) {
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].type && items[i].type.indexOf('image/') === 0) { imgItem = items[i]; break; }
+        }
+      }
+      if (imgItem) {
+        var f = imgItem.getAsFile();
+        if (f) {
+          var fr = new FileReader();
+          fr.onload = function () {
+            document.execCommand('insertHTML', false,
+              '<img src="' + fr.result + '" alt="pasted" style="max-width:100%">');
+            toast('图片已插入（base64 本地保存）。发布前可点「上传粘贴图片」转存到仓库', 'info');
+          };
+          fr.readAsDataURL(f);
+          return;
+        }
+      }
+      // ② 纯文本 / HTML（含 Word 内容，进入 sanitizeHtml 清洗）
       var html = '';
       var text = '';
       try {
