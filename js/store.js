@@ -308,6 +308,7 @@
     var sha = await getFileSha(cfg, 'products.json');
     if (sha) body.sha = sha;
     await ghRequest(cfg, 'PUT', 'products.json', body);
+    return content; // 返回发布内容文本，供后台记录同步基线
   }
 
   async function testConnection(cfg) {

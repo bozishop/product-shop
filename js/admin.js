@@ -98,6 +98,105 @@
     S.setRawBase(state.data.site && state.data.site.rawBase);
   }
 
+  /* ---------- 登录后同步线上最新数据 ---------- */
+  function hashText(s) {
+    var h = 5381;
+    s = String(s || '');
+    for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(16);
+  }
+
+  // 参与同步比较的规范化文本（剔除 rawBase 等派生字段，保证跨设备可比）
+  function comparableText(d) {
+    var clone;
+    try { clone = JSON.parse(JSON.stringify(d || {})); } catch (e) { return ''; }
+    if (clone.site) delete clone.site.rawBase;
+    return S.exportJSON(clone);
+  }
+
+  function getLastPubHash() {
+    try { return localStorage.getItem('ps_lastpub_v1'); } catch (e) { return null; }
+  }
+  function setLastPubHash(h) {
+    try { localStorage.setItem('ps_lastpub_v1', h || ''); } catch (e) {}
+  }
+
+  function fetchTimeout(url, ms) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, ms || 6000);
+    return fetch(url, ctrl ? { signal: ctrl.signal } : undefined).then(function (res) {
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.text();
+    }, function (err) { clearTimeout(timer); throw err; });
+  }
+
+  // 拉取线上最新发布数据：优先 raw 直链（免 Pages 部署延迟），失败回退同源 products.json
+  function fetchPublishedData() {
+    var c = S.getGitConfig();
+    var raw = (c && c.owner && c.repo)
+      ? 'https://raw.githubusercontent.com/' + c.owner + '/' + c.repo + '/' + (c.branch || 'main') + '/products.json'
+      : '';
+    var first = raw ? fetchTimeout(raw, 6000) : Promise.reject(new Error('no raw url'));
+    return first.catch(function () {
+      return fetchTimeout('products.json?v=' + Date.now(), 6000);
+    });
+  }
+
+  // 登录后调用：对比线上与本浏览器数据并智能同步
+  function syncAfterLogin() {
+    fetchPublishedData().then(function (text) {
+      var parsed;
+      try { parsed = JSON.parse(text); } catch (e) { return; }
+      if (!parsed || !Array.isArray(parsed.products)) return;
+      var pubText = comparableText(parsed);
+      var localText = comparableText(state.data);
+      if (pubText === localText) return; // 与线上一致，无需处理
+      var base = getLastPubHash();
+      var localHash = hashText(localText);
+      if (base && localHash === base) { adoptPublished(parsed, true); return; } // 本地自上次发布后没改过 → 线上是最新
+      if (!base && localHash === hashText(comparableText(S.defaultData()))) { adoptPublished(parsed, true); return; } // 全新浏览器 → 直接采用线上
+      if (pubHashOnline(base, pubText)) return; // 线上与上次发布一致 → 本地有未发布修改，不打扰
+      showSyncBar(parsed);                      // 双方都有改动 → 让用户选择
+    }).catch(function () { /* 离线或数据不可用：静默跳过 */ });
+  }
+
+  function pubHashOnline(base, pubText) {
+    return base && hashText(pubText) === base;
+  }
+
+  function adoptPublished(parsed, silent) {
+    state.data = S.normalizeData(parsed);
+    state.selectedIds = [];
+    saveCurrent();
+    renderAll();
+    hideSyncBar();
+    toast(silent ? '已同步线上最新数据（' + state.data.products.length + ' 件商品）' : '已使用线上最新数据', 'success');
+  }
+
+  function showSyncBar(parsed) {
+    var bar = $('#syncBar');
+    if (!bar) return;
+    var pubN = (parsed.products || []).length;
+    var locN = (state.data.products || []).length;
+    bar.innerHTML = '⚠️ <b>数据不一致</b>：线上已发布数据（' + pubN + ' 件商品）与本浏览器数据（' + locN + ' 件商品）不同，请选择要使用的版本：'
+      + ' <button type="button" class="btn btn-sm btn-primary" id="syncUseRemote">⬇️ 使用线上最新</button>'
+      + ' <button type="button" class="btn btn-sm" id="syncKeepLocal">💾 保留本浏览器数据</button>';
+    bar.classList.remove('hidden');
+    var use = $('#syncUseRemote');
+    var keep = $('#syncKeepLocal');
+    if (use) use.addEventListener('click', function () { adoptPublished(parsed, false); });
+    if (keep) keep.addEventListener('click', function () {
+      hideSyncBar();
+      toast('已保留本浏览器数据，可编辑后重新发布覆盖线上', 'info');
+    });
+  }
+
+  function hideSyncBar() {
+    var bar = $('#syncBar');
+    if (bar) bar.classList.add('hidden');
+  }
+
   function saveGitState() {
     try { localStorage.setItem('ps_git_sync_v1', JSON.stringify(state.gitSync || null)); } catch (e) {}
   }
@@ -155,6 +254,7 @@
     $('#app').classList.remove('hidden');
     document.body.setAttribute('data-theme', S.getTheme());
     renderAll();
+    syncAfterLogin(); // 登录后拉取线上最新发布数据并智能同步
   }
 
   function logout() {
@@ -962,7 +1062,10 @@
     toggleBtnLoading(btn, true);
     S.saveGitConfig(cfg);
     S.publishJSON(cfg, state.data)
-      .then(function () {
+      .then(function (publishedText) {
+        // 记录本次发布基线：下次登录对比用（剔除 rawBase 后比对）
+        if (publishedText) setLastPubHash(hashText(comparableText(state.data)));
+        hideSyncBar();
         setGitStatus('🚀 发布成功！约 1 分钟内 GitHub Pages 全站生效（刷新前台即可看到）。', 'success');
         toast('发布成功！', 'success');
       })

@@ -47,6 +47,8 @@
     <main class="main" id="mainArea">
       <!-- 只读锁提示条：GitHub 同步未验证可用时显示 -->
       <div class="ro-lock hidden" id="roLockBar"></div>
+      <!-- 数据同步提示条：线上数据与本浏览器数据不一致时显示 -->
+      <div class="ro-lock hidden" id="syncBar" style="border-color:#8ab4f8;background:#eef4fe;color:#1a4d8f"></div>
       <!-- ======== 概览 ======== -->
       <section class="page active" id="page-overview">
         <h2 class="page-title">概览</h2>
@@ -389,7 +391,7 @@
 
   <div id="toast-wrap"></div>
 
-  <script src="js/store.js?v=4"></script>
-  <script src="js/admin.js?v=4"></script>
+  <script src="js/store.js?v=5"></script>
+  <script src="js/admin.js?v=5"></script>
 </body>
 </html>
