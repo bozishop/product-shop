@@ -163,7 +163,12 @@ body[data-theme="dark"] .ro-lock {
   border-color: #6b5b2a;
   color: #e8d48a;
 }
-body.readonly-mode button.btn:not(.ro-lock .btn) { opacity: .5; }
+/* 只读模式仅淡化「内容编辑」页面的按钮；GitHub 同步页（解锁入口）、修改密码页、退出登录/登录按钮保持正常可点 */
+body.readonly-mode #page-overview button.btn,
+body.readonly-mode #page-products button.btn,
+body.readonly-mode #page-categories button.btn,
+body.readonly-mode #page-site button.btn,
+body.readonly-mode #page-data button.btn { opacity: .5; }
 .tag-pill {
   display: inline-block; padding: 2px 8px; border-radius: 6px;
   background: var(--primary-light); color: var(--primary); font-size: 12px; margin-right: 4px;

@@ -289,6 +289,7 @@
     state.search = '';
     state.catFilter = '';
     $('#loginPwd').value = '';
+    document.body.classList.remove('readonly-mode'); // 回到登录页：解除按钮虚化，登录按钮保持正常
     $('#login-page').classList.remove('hidden');
     $('#app').classList.add('hidden');
     hideSyncBar();
