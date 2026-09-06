@@ -319,6 +319,31 @@
     return true;
   }
 
+  /* ---------- Raw 直链解析 ---------- */
+  // 把相对路径（如 images/xxx.jpg）转换为 GitHub raw 直链，用于 Pages 部署延迟窗口内秒开图片。
+  // 支持三种部署形态：bozishop.github.io/product-shop（项目站）/ bozishop.github.io（用户名站）/ localhost（本地预览 原样返回）
+  function toRawGitUrl(path) {
+    if (!path) return '';
+    if (/^(https?:)?\/\//i.test(path) || /^data:/i.test(path)) return path; // 已有协议/外链/base64 不动
+    try {
+      var host = window.location.hostname || '';
+      var hostLow = host.toLowerCase();
+      if (hostLow.indexOf('github.io') === -1) return path; // 非 github.io（如 localhost）原样返回
+
+      var owner = hostLow.split('.')[0];
+      var pathname = window.location.pathname || '/';
+      var repo = pathname.split('/').filter(function (s) { return s; })[0] || '';
+      if (!owner || !repo) return path;
+
+      var branch = 'main';
+      var clean = String(path).replace(/^\/+/, '');
+      return 'https://raw.githubusercontent.com/' + encodeURIComponent(owner) +
+        '/' + encodeURIComponent(repo) + '/' + encodeURIComponent(branch) + '/' + clean;
+    } catch (e) {
+      return path;
+    }
+  }
+
   /* ---------- 主题 ---------- */
   function getTheme() {
     var saved = localStorage.getItem(LS_THEME_KEY);
@@ -376,6 +401,7 @@
     saveGitConfig: saveGitConfig,
     clearGitConfig: clearGitConfig,
     getFileSha: getFileSha,
+    toRawGitUrl: toRawGitUrl,
     uploadImage: uploadImage,
     publishJSON: publishJSON,
     testConnection: testConnection,

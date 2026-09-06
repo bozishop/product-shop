@@ -184,7 +184,16 @@
       img.className = 'thumb';
       img.src = p.image || '';
       img.alt = p.name;
-      img.onerror = function () { this.src = ''; this.style.visibility = 'hidden'; };
+      img.onerror = function () {
+        if (this._rawTried !== true && p.image) {
+          this._rawTried = true;
+          this.onerror = null;
+          var raw = S.toRawGitUrl(p.image);
+          if (raw && raw !== p.image) { this.src = raw; return; }
+        }
+        this.onerror = null;
+        this.style.visibility = 'hidden';
+      };
       tdImg.appendChild(img);
 
       var tdName = document.createElement('td');
@@ -564,9 +573,19 @@
     function refresh() {
       var src = urlInput.value.trim() || (pending.dataUrl || '');
       if (preview) {
+        if (preview._rawTried) { delete preview._rawTried; }
         preview.src = src;
         preview.style.visibility = src ? 'visible' : 'hidden';
-        preview.onerror = function () { this.style.visibility = 'hidden'; };
+        preview.onerror = function () {
+          if (this._rawTried !== true && src) {
+            this._rawTried = true;
+            this.onerror = null;
+            var raw = S.toRawGitUrl(src);
+            if (raw && raw !== src) { this.src = raw; return; }
+          }
+          this.onerror = null;
+          this.style.visibility = 'hidden';
+        };
       }
     }
 

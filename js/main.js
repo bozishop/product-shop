@@ -43,6 +43,13 @@
     img.alt = alt || '';
     img.loading = 'lazy';
     img.onerror = function () {
+      // 相对路径在 Pages 部署延迟窗口内会 404 → 自动升级到 raw 直链（commit 落盘即可秒开）
+      if (img._rawTried !== true && src) {
+        img._rawTried = true;
+        img.onerror = null;
+        var raw = S.toRawGitUrl(src);
+        if (raw && raw !== src) { img.src = raw; return; }
+      }
       img.onerror = null;
       img.src = PLACEHOLDER_IMG;
     };
@@ -345,7 +352,17 @@
   /* ---------- 详情弹窗 ---------- */
   function openDetailModal(p) {
     $('#detailImg').src = p.image || PLACEHOLDER_IMG;
-    $('#detailImg').onerror = function () { this.onerror = null; this.src = PLACEHOLDER_IMG; };
+    $('#detailImg').onerror = function () {
+      var that = this;
+      if (that._rawTried !== true && p.image) {
+        that._rawTried = true;
+        that.onerror = null;
+        var raw = S.toRawGitUrl(p.image);
+        if (raw && raw !== p.image) { that.src = raw; return; }
+      }
+      that.onerror = null;
+      that.src = PLACEHOLDER_IMG;
+    };
     $('#detailName').textContent = p.name;
     $('#detailCat').textContent = p.category || '未分类';
 
@@ -400,7 +417,17 @@
   function openPayModal(p) {
     var site = state.data.site;
     $('#payImg').src = site.paymentImage || PLACEHOLDER_IMG;
-    $('#payImg').onerror = function () { this.onerror = null; this.src = PLACEHOLDER_IMG; };
+    $('#payImg').onerror = function () {
+      var that = this;
+      if (that._rawTried !== true && site.paymentImage) {
+        that._rawTried = true;
+        that.onerror = null;
+        var raw = S.toRawGitUrl(site.paymentImage);
+        if (raw && raw !== site.paymentImage) { that.src = raw; return; }
+      }
+      that.onerror = null;
+      that.src = PLACEHOLDER_IMG;
+    };
     $('#payTip').textContent = '订单：「' + p.name + '」 金额 ¥' + S.fmtPrice(p.price) + '\n' + (site.paymentTip || '');
     var note = $('#payNote');
     if (site.paymentNote) {
