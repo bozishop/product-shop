@@ -110,6 +110,7 @@ product-shop/
 | 前台看不到后台改的数据？ | 只改了本浏览器 localStorage；请「一键发布」或手动 push products.json |
 | 上传图片报 403？ | Token 权限不足，请确认勾选 `repo`；或检查分支名 |
 | 刚上传的图片 404？ | Pages 部署有 1~2 分钟延迟；前台会自动改用 raw 直链立即显示，正式路径稍后自动恢复 |
+| 改了密码其他设备没生效？ | 密码哈希随 products.json 保存；修改后需「一键发布」同步到线上，其他设备才使用新密码（发布前仍是旧密码/默认 admin123） |
 | 前台没有商品？ | 检查 `products.json` 是否有 `products` 数组，且商品 `active: true` |
 | 想清掉本地预览数据？ | 后台「数据管理」→ 恢复默认示例数据；或浏览器清除该站点 localStorage |
 

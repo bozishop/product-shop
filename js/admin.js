@@ -238,16 +238,41 @@
     }
   }
 
-  /* ---------- 登录 ---------- */
-  function doLogin() {
+  /* ---------- 登录（校验用密码哈希：优先线上最新，回退本浏览器数据） ---------- */
+  async function fetchLoginPasswordHash() {
+    // 1) 同源部署版 products.json（快且稳定，带时间戳防缓存）
+    try {
+      var j1 = JSON.parse(await fetchTimeout('products.json?v=' + Date.now(), 5000));
+      if (j1 && j1.site && j1.site.adminPasswordHash) return j1.site.adminPasswordHash;
+    } catch (e) { /* ignored */ }
+    // 2) raw 直链（最新发布，避免 Pages 部署延迟）
+    try {
+      var c = S.getGitConfig();
+      if (c && c.owner && c.repo) {
+        var j2 = JSON.parse(await fetchTimeout('https://raw.githubusercontent.com/' + c.owner + '/' + c.repo + '/' + (c.branch || 'main') + '/products.json', 6000));
+        if (j2 && j2.site && j2.site.adminPasswordHash) return j2.site.adminPasswordHash;
+      }
+    } catch (e) { /* ignored */ }
+    // 3) 回退：本浏览器数据中的哈希
+    return (state.data.site && state.data.site.adminPasswordHash) || '';
+  }
+
+  async function doLogin() {
     var val = $('#loginPwd').value;
-    if (val === S.getPassword()) {
-      S.setAdminAuthed(true);
-      showApp();
-      toast('登录成功', 'success');
-    } else {
+    if (!val) { toast('请输入管理密码', 'error'); return; }
+    var btn = $('#loginBtn');
+    toggleBtnLoading(btn, true);
+    var expectHash = '';
+    try { expectHash = await fetchLoginPasswordHash(); }
+    catch (e) { /* 网络异常：回退本浏览器数据中的哈希 */ }
+    toggleBtnLoading(btn, false);
+    if (!S.verifyPassword(val, expectHash)) {
       toast('密码错误，请重试', 'error');
+      return;
     }
+    S.setAdminAuthed(true);
+    showApp();
+    toast('登录成功', 'success');
   }
 
   function showApp() {
@@ -280,7 +305,7 @@
       msg = '退出登录将清除本浏览器缓存的店铺数据，下次登录将自动获取线上最新数据。\n\n（已发布到线上的内容不受影响）\n\n确定退出登录吗？';
     }
     if (!confirm(msg)) return;
-    // 确认退出：清除本地内容缓存（保留主题 / 登录密码 / GitHub 配置与验证状态）
+    // 确认退出：清除本地内容缓存（密码哈希在线上，重新登录自动获取；保留主题 / GitHub 配置与验证状态）
     S.resetLocal();
     try { localStorage.removeItem('ps_lastpub_v1'); } catch (e) {}
     S.setAdminAuthed(false);
@@ -1184,15 +1209,18 @@
 
   /* ---------- 修改密码 ---------- */
   function changePassword() {
+    if (!requireWritable()) return;
     var oldV = $('#pwd_old').value;
     var newV = $('#pwd_new').value;
     var cnf = $('#pwd_confirm').value;
-    if (oldV !== S.getPassword()) { toast('当前密码错误', 'error'); return; }
+    var curHash = (state.data.site && state.data.site.adminPasswordHash) || '';
+    if (!S.verifyPassword(oldV, curHash)) { toast('当前密码错误', 'error'); return; }
     if (!newV || newV.length < 4) { toast('新密码至少 4 位', 'error'); return; }
     if (newV !== cnf) { toast('两次输入的新密码不一致', 'error'); return; }
-    S.setPassword(newV);
+    state.data.site.adminPasswordHash = S.hashPassword(newV);
+    saveCurrent();
     $('#pwd_old').value = $('#pwd_new').value = $('#pwd_confirm').value = '';
-    toast('密码已更新', 'success');
+    toast('密码已更新（本浏览器即时生效）。请到「GitHub 同步」一键发布，其他设备才会使用新密码', 'success');
   }
 
   /* ---------- 渲染总入口 ---------- */

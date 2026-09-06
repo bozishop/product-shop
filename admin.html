@@ -18,7 +18,7 @@
         <input type="password" class="input" id="loginPwd" placeholder="请输入管理密码" autocomplete="current-password">
       </div>
       <button class="btn btn-primary btn-block" id="loginBtn">登 录</button>
-      <div class="login-hint">默认密码：admin123（登录后请尽快在「修改密码」中更换）</div>
+      <div class="login-hint">默认密码：admin123（修改后需「一键发布」才对所有设备生效）</div>
     </div>
   </div>
 
@@ -276,7 +276,7 @@
       <!-- ======== 修改密码 ======== -->
       <section class="page" id="page-password">
         <h2 class="page-title">修改密码</h2>
-        <p class="page-sub">密码保存在本浏览器 localStorage，修改后下次登录生效</p>
+        <p class="page-sub">密码哈希随店铺数据保存：修改后本浏览器即时生效，一键发布后对所有设备生效</p>
         <div class="card" style="max-width:480px">
           <div class="form-group">
             <label class="field-label">当前密码</label>
@@ -291,6 +291,7 @@
             <input class="input" id="pwd_confirm" type="password" autocomplete="new-password">
           </div>
           <button class="btn btn-primary" id="pwdChangeBtn">更新密码</button>
+          <div class="form-hint" style="margin-top:10px">⚠️ 修改后需到「GitHub 同步」一键发布，其他设备/浏览器才会使用新密码；发布前它们仍使用旧密码（从未改过则为默认 admin123）。</div>
         </div>
       </section>
     </main>
@@ -391,7 +392,7 @@
 
   <div id="toast-wrap"></div>
 
-  <script src="js/store.js?v=5"></script>
+  <script src="js/store.js?v=6"></script>
   <script src="js/admin.js?v=6"></script>
 </body>
 </html>
